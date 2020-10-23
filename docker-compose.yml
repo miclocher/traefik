@@ -1,0 +1,46 @@
+version: "3.6"
+
+services:
+  reverse_proxy:
+    image: traefik:v1.7.4-alpine
+ #hostname: awk-analytics.switzerlandnorth.cloudapp.azure.com
+    environment:
+      TZ: Europe/Zurich
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8080:8080'
+    container_name: test
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/awk_admin/hdd/cloud_infrastructure/traefik/acme.json:/acme.json
+    command:
+      --api=true
+      --api.dashboard=true
+      --api.entryPoint=https
+      --debug=false
+      --logLevel='DEBUG'
+   #   --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'
+   #   --entryPoints='Name:https Address::443 TLS Redirect.Regex:^https://awk-analytics.switzerlandnorth.cloudapp.azure.com/$      --defaultentrypoints='http,https'
+      --docker
+   #   --docker.exposedbydefault=false
+   #   --docker.watch=true
+   #   --docker.swarmmode=false
+      --docker.endpoint='unix:///var/run/docker.sock'
+   #   --docker.domain=awk-analytics.switzerlandnorth.cloudapp.azure.com
+      --acme.email=thomas.kathriner@awk.ch
+      --acme.storage=acme.json
+      --acme.entryPoint=https
+      --acme.onHostRule=true
+      --acme.httpchallenge.entrypoint=http
+    networks:
+      - traefik_transit
+    labels:
+   #   - traefik.backend=traefik
+   #   - traefik.docker.network=traefik_transit
+   #   - traefik.backend.healthcheck.path=/path
+
+networks:
+  traefik_transit:
+   external: true
